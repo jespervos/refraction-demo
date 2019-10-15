@@ -1,5 +1,6 @@
 import '../styles/index.scss';
 import loadTexture from '~/scripts/util/texture-loader';
+import loadModel from '~/scripts/util/model-loader';
 import * as THREE from 'three';
 import BackfaceMaterial from './backface-material';
 import RefractionMaterial from './refraction-material';
@@ -25,7 +26,7 @@ class App {
 
 		this.orthoCamera.layers.set(1);
 
-		this.renderer = new THREE.WebGLRenderer({ antialias: true });
+		this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 		this.renderer.setSize( this.vp.width, this.vp.height );
 		this.renderer.setPixelRatio(this.vp.dpr);
 		this.renderer.autoClear = false;
@@ -37,7 +38,7 @@ class App {
 		const tex = await loadTexture('public/texture.jpg');
 		this.quad = new THREE.Mesh(new THREE.PlaneBufferGeometry(), new THREE.MeshBasicMaterial({map: tex}));
 		this.quad.layers.set(1);
-		this.quad.scale.set(this.vp.width, this.vp.height, 1);
+		this.quad.scale.set(this.vp.height*2, this.vp.height, 1);
 		this.scene.add(this.quad);
 
 		this.refractionMaterial = new RefractionMaterial({
@@ -51,6 +52,26 @@ class App {
 		const sphere = new THREE.SphereBufferGeometry(2, 64, 64);
 		const box = new THREE.BoxBufferGeometry(2,2,2);
 		this.cube = new THREE.Mesh(box, this.refractionMaterial);
+		this.mesh = this.cube;
+
+		// let {model} = await loadModel('public/Robot Girl Bust.gltf');
+		// model = model.children[0];
+		// model.scale.set(0.03,0.03,0.03);
+		// model.rotation.x = Math.PI*-0.5;
+		// model.position.y = -2;
+		// this.cube = new THREE.Object3D();
+		// this.cube.add(model);
+		// this.mesh = model;
+
+		let {model} = await loadModel('public/ruby xanh trong suot.gltf');
+		model = model.children[0];
+		model.scale.set(0.1,0.1,0.1);
+		// model.rotation.x = Math.PI*-0.5;
+		model.position.y = -1.5;
+		this.cube = new THREE.Object3D();
+		this.cube.add(model);
+		this.mesh = model;
+
 		this.scene.add(this.cube);
 
 		this.camera.position.z = 5;
@@ -84,7 +105,7 @@ class App {
 		this.renderer.render( this.scene, this.orthoCamera );
 
 		// render cube backfaces to fbo
-		this.cube.material = this.backfaceMaterial;
+		this.mesh.material = this.backfaceMaterial;
 		this.renderer.setRenderTarget(this.backfaceFbo);
 		this.renderer.clearDepth();
 		this.renderer.render( this.scene, this.camera );
@@ -95,7 +116,7 @@ class App {
 		this.renderer.clearDepth();
 
 		// render cube with refraction material to screen
-		this.cube.material = this.refractionMaterial;
+		this.mesh.material = this.refractionMaterial;
 		this.renderer.render( this.scene, this.camera );
 	};
 
@@ -107,7 +128,7 @@ class App {
 		this.envFbo.setSize(this.vp.width * this.vp.dpr, this.vp.height * this.vp.dpr);
 		this.backfaceFbo.setSize(this.vp.width * this.vp.dpr, this.vp.height * this.vp.dpr);
 
-		this.quad.scale.set(this.vp.width, this.vp.height, 1);
+		this.quad.scale.set(this.vp.height*2, this.vp.height, 1);
 
 		this.cube.material.uniforms.resolution.value = [this.vp.width*this.vp.dpr, this.vp.height*this.vp.dpr];
 

@@ -1,10 +1,13 @@
 varying vec3 worldNormal;
 varying vec3 viewDirection;
+varying vec3 worldPosition;
 
 void main() {
-	vec4 worldPosition = modelMatrix * vec4( position, 1.0);
+	vec4 worldPos = modelMatrix * vec4( position, 1.0);
 	worldNormal = normalize( modelViewMatrix * vec4(normal, 0.)).xyz;
-	viewDirection = normalize(worldPosition.xyz - cameraPosition);
+	viewDirection = normalize(worldPos.xyz - cameraPosition);
+
+	worldPosition = normalize(worldPos.xyz) * 0.5 + 0.5;
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
